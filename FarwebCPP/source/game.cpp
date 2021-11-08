@@ -1,7 +1,15 @@
-#include "game.h"
+#include "TextureManager.h"
+#include "Atom.h"
+#include <iostream>
+#include "Map.h"
+#include "ECS/Components.h"
 
-SDL_Texture* playerTex;
-SDL_Rect srcR, destR;
+Map* map;
+Manager manager;
+
+auto& player(manager.addEntity());
+
+SDL_Renderer* _game::renderer = nullptr;
 
 _game::_game(){}
 _game::~_game(){}
@@ -24,8 +32,11 @@ void _game::init(const char* title, int xpos, int ypos, int width, int height, b
 		isRunning = false;
 		std::cout << "Failed to initialize" << std::endl;
 	}
-	playerTex = TextureManager::LoadTexture("assets/player.png", renderer);
-;}
+	map = new Map();
+
+	player.addComponent<TransformComponent>();
+	player.addComponent<SpriteComponent>("assets/player.png");
+}
 
 void _game::handleEvents(){
 	SDL_Event event;
@@ -38,25 +49,7 @@ void _game::handleEvents(){
 		if (event.key.keysym.sym == SDLK_ESCAPE) {
 			isRunning = false;	
 		}
-		isMoving = false;
-		dir = NULL;
-		std::cout << "Subiu" << std::endl;
-		break;
-	case SDL_KEYDOWN:
-		if (event.key.keysym.sym == SDLK_w) {
-			dir = NORTH;
-		}
-		if (event.key.keysym.sym == SDLK_a) {
-			dir = WEST;
-		}
-		if (event.key.keysym.sym == SDLK_s) {
-			dir = SOUTH;
-		}
-		if (event.key.keysym.sym == SDLK_d) {
-			dir = EAST;
-		}
-		isMoving = true;
-		break;
+
 	default:
 		break;
 	}
@@ -65,28 +58,14 @@ void _game::handleEvents(){
 }
 
 void _game::update() {
-	destR.h = 128;
-	destR.w = 128;
-	std::cout << dir << " " << isMoving << std::endl;
-	if (isMoving && dir) {
-		if (dir == NORTH) {
-			destR.y -= SPEED;
-		}
-		else if (dir == WEST) {
-			destR.x -= SPEED;
-		}
-		else if (dir == SOUTH) {
-			destR.y += SPEED;
-		}
-		else if (dir == EAST) {
-			destR.x += SPEED;
-		}
-	}
+	manager.Update();
+	manager.Refresh();
 }
 
 void _game::render() {
 	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, playerTex, NULL, &destR);
+	map->DrawMap();
+	manager.Draw();
 	SDL_RenderPresent(renderer);
 }
 

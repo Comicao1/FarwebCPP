@@ -1,10 +1,4 @@
-#include <iostream>
-#include <string>
-#include <math.h>
-#include <vector>
 #include "SDL.h"
-#include "SDL_image.h"
-#include "TextureManager.h"
 
 #define NORTH 1
 #define WEST 2
@@ -28,13 +22,8 @@ public:
 	void render();
 	void clean();
 	bool running() { return isRunning; }
-
-	int dir;
-	int cnt;
-	bool isMoving = false;
-	int x, y, z;
+	static SDL_Renderer *renderer;
 private:
 	bool isRunning;
 	SDL_Window *window;
-	SDL_Renderer *renderer;
 };
