@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Map.h"
 #include "ECS/Components.h"
+#include "Vector2D.h"
 
 Map* map;
 Manager manager;
@@ -10,6 +11,7 @@ Manager manager;
 auto& player(manager.addEntity());
 
 SDL_Renderer* _game::renderer = nullptr;
+SDL_Event _game::event;
 
 _game::_game(){}
 _game::~_game(){}
@@ -36,30 +38,24 @@ void _game::init(const char* title, int xpos, int ypos, int width, int height, b
 
 	player.addComponent<TransformComponent>();
 	player.addComponent<SpriteComponent>("assets/player.png");
+	player.addComponent<KeyboardController>();
 }
 
 void _game::handleEvents(){
-	SDL_Event event;
 	SDL_PollEvent(&event);
 	switch (event.type) {
 	case SDL_QUIT:
 		isRunning = false;
 		break;
-	case SDL_KEYUP:
-		if (event.key.keysym.sym == SDLK_ESCAPE) {
-			isRunning = false;	
-		}
-
 	default:
 		break;
 	}
-
-
 }
 
 void _game::update() {
 	manager.Update();
-	manager.Refresh();
+	manager.Refresh(); 
+	
 }
 
 void _game::render() {
