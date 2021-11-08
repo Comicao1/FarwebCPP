@@ -50,6 +50,17 @@ void Map::LoadMap(int arr[20][20]) {
 	}
 }
 
+Map::~Map() {
+	SDL_DestroyTexture(graystone);
+	SDL_DestroyTexture(bluestone);
+	SDL_DestroyTexture(merch);
+	SDL_DestroyTexture(dark);
+	SDL_DestroyTexture(dirt);
+	SDL_DestroyTexture(dirt2);
+	SDL_DestroyTexture(cerb);
+	SDL_DestroyTexture(plaza);
+}
+
 void Map::DrawMap() {
 	int type = 0;
 	for (int row = 0; row < 20; row++) {

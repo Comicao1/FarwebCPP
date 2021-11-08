@@ -1,5 +1,6 @@
 #include "SDL.h"
 
+
 #define NORTH 1
 #define WEST 2
 #define SOUTH 3
@@ -8,8 +9,6 @@
 #define SPEED 128 / 64
 #define FPS 60
 #define frameDelay 1000/FPS
-
-
 
 class _game {
 public:
