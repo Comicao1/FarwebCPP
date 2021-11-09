@@ -1,5 +1,6 @@
+#pragma once
 #include "SDL.h"
-
+#include <vector>
 
 #define NORTH 1
 #define WEST 2
@@ -9,6 +10,8 @@
 #define SPEED 128 / 64
 #define FPS 60
 #define frameDelay 1000/FPS
+
+class ColliderComponent;
 
 class _game {
 public:
@@ -21,8 +24,17 @@ public:
 	void render();
 	void clean();
 	bool running() { return isRunning; }
+
 	static SDL_Renderer *renderer;
 	static SDL_Event event;
+	static SDL_Rect camera;
+
+	enum groupLabels : std::size_t {
+		groupMap,
+		groupPlayers,
+		groupColliders
+	};
+
 private:
 	bool isRunning;
 	SDL_Window *window;

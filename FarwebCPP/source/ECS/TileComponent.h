@@ -1,42 +1,42 @@
 #pragma once
-#include "../game.h"
-
+#include "Components.h"
+#include "ECS.h"
+#include "../Vector2D.h"
+#include "../Game.h"
+#include "../TextureManager.h"
 class TileComponent : public Component {
 public:
-	TransformComponent *transform;
-	SpriteComponent *sprite;
 
-	SDL_Rect tileRect;
-	int tileID;
-	const char* path;
+	SDL_Texture* texture;
+	SDL_Rect srcRect, destRect;
+	Vector2D position;
+
 
 	TileComponent() = default;
 
-	TileComponent(int x, int y, int w, int h, int id) {
-		tileRect.x = x;
-		tileRect.y = y;
-		tileRect.w = w;
-		tileRect.h = h;
-		tileID = id;
-		switch (tileID) {
-		case 0:
-			path = "assets/graystone.png";
-			break;
-		case 1:
-			path = "assets/bluestone.png";
-			break;
-		case 2:
-			path = "assets/merch.png";
-			break;
-		default:
-			break;
-		}
+	~TileComponent() {
+		SDL_DestroyTexture(texture);
 	}
-	void init() override {
-		entity->addComponent<TransformComponent>((float)tileRect.x, (float)tileRect.y, (float)tileRect.w, (float)tileRect.h, 1);
-		transform = &entity->getComponent<TransformComponent>();
 
-		entity->addComponent<SpriteComponent>(path);
-		sprite = &entity->getComponent<SpriteComponent>();
+
+	TileComponent(int srcX, int srcY, int xpos, int ypos, int tsize, int tscale, const char* path){
+		texture = TextureManager::LoadTexture(path);
+
+		srcRect.x = srcX;
+		srcRect.y = srcY;
+		srcRect.w = srcRect.h = tsize;
+		position.x = xpos;
+		position.y = ypos;
+		destRect.x = xpos;
+		destRect.y = ypos;
+		destRect.w = destRect.h = tsize * tscale;
 	}
+	void update() override {
+		destRect.x = position.x - _game::camera.x;
+		destRect.y = position.y - _game::camera.y;
+	}
+	void draw() override {
+		TextureManager::Draw(texture, srcRect, destRect, SDL_FLIP_NONE);
+	}
+
 };

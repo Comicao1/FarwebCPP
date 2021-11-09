@@ -1,24 +1,17 @@
 #pragma once
-#include "SDL.h"
+#include <string>
 
 class Map {
 public:
-	Map();
+	Map(const char* mfp, int ms, int ts);
 	~Map();
 
-	void LoadMap(int[20][20]);
-	void DrawMap();
+	void LoadMap(std::string path, int sizeX, int sizeY);
+	void AddTile(int srcX, int srcY, int xpos, int ypos);
 
 private:
-	SDL_Rect src, dest;
-	SDL_Texture* graystone;
-	SDL_Texture* bluestone;
-	SDL_Texture* merch;
-	SDL_Texture* dark;
-	SDL_Texture* dirt;
-	SDL_Texture* dirt2;
-	SDL_Texture* cerb;
-	SDL_Texture* plaza;
-
-	int map[20][20];
+	const char* mapFilePath;
+	int mapScale;
+	int tileSize;
+	int scaledSize;
 };

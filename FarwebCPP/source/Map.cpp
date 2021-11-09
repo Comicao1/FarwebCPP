@@ -1,86 +1,59 @@
 #include "Map.h"
+#include "game.h"
+#include <fstream>
 #include "TextureManager.h"
+#include "ECS/ECS.h"
+#include "ECS/Components.h"
+extern Manager manager;
 
-int lvl1[20][20] = {
-	{1,1,2,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{1,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{1,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,1,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-};
-
-Map::Map() {
-	graystone = TextureManager::LoadTexture("assets/graystone.png");
-	bluestone = TextureManager::LoadTexture("assets/bluestone.png");
-	merch = TextureManager::LoadTexture("assets/merch.png");
-	dark = TextureManager::LoadTexture("assets/dark.png");
-	dirt = TextureManager::LoadTexture("assets/dirt.png");
-	dirt2 = TextureManager::LoadTexture("assets/dirt2.png");
-	cerb = TextureManager::LoadTexture("assets/cerb.png");
-	plaza = TextureManager::LoadTexture("assets/plaza.png");
-
-	LoadMap(lvl1);
-	src.x = src.y = 0;
-	src.w = dest.w = 64;
-	src.h = dest.h = 64;
-
-	dest.x = dest.y = 0;
+Map::Map(const char* mfp, int ms, int ts) : mapFilePath(mfp), mapScale(ms), tileSize(ts) {
+	scaledSize = ms * ts;
 }
 
-void Map::LoadMap(int arr[20][20]) {
-	for (int row = 0; row < 20; row++) {
-		for (int column = 0; column < 20; column++) {
-			map[row][column] = arr[row][column];
+void Map::LoadMap(std::string path, int sizeX, int sizeY) {
+	char c;
+	std::fstream mapFile;
+	mapFile.open(path);
+	
+	int srcX;
+	int srcY;
+	
+	for (int y = 0; y < sizeY; y++)
+	{
+		for (int x = 0; x < sizeX; x++)
+		{
+			mapFile.get(c);
+			srcY = atoi(&c) * tileSize;
+			mapFile.get(c);
+			srcX = atoi(&c) * tileSize;
+			AddTile(srcX, srcY, x * scaledSize, y * scaledSize);
+			mapFile.ignore();
 		}
 	}
+
+	mapFile.ignore();
+	
+	for (int y = 0; y < sizeY; y++) {
+		for (int x = 0; x < sizeX; x++) {
+			mapFile.get(c);
+			if (c == '1') {
+				auto& tcol(manager.addEntity());
+				tcol.addComponent<ColliderComponent>("terrain", x * scaledSize, y * scaledSize, scaledSize);
+				tcol.addGroup(_game::groupColliders);
+			}
+			mapFile.ignore();
+		}
+	}
+	
+	mapFile.close();
 }
 
 Map::~Map() {
-	SDL_DestroyTexture(graystone);
-	SDL_DestroyTexture(bluestone);
-	SDL_DestroyTexture(merch);
-	SDL_DestroyTexture(dark);
-	SDL_DestroyTexture(dirt);
-	SDL_DestroyTexture(dirt2);
-	SDL_DestroyTexture(cerb);
-	SDL_DestroyTexture(plaza);
+
 }
 
-void Map::DrawMap() {
-	int type = 0;
-	for (int row = 0; row < 20; row++) {
-		for (int column = 0; column < 20; column++) {
-			type = map[row][column];
-			dest.x = 64 * column;
-			dest.y = 64 * row;
-			switch (type) {
-			case 0:
-				TextureManager::Draw(dirt, src, dest);
-				break;
-			case 1:
-				TextureManager::Draw(cerb, src, dest);
-				break;
-			case 2:
-				TextureManager::Draw(plaza, src, dest);
-				break;
-			default:
-				break;
-			}
-		}
-	}
+void Map::AddTile(int srcX, int srcY, int xpos, int ypos) {
+	auto& tile(manager.addEntity());
+	tile.addComponent<TileComponent>(srcX, srcY, xpos, ypos, tileSize, mapScale, mapFilePath);
+	tile.addGroup(_game::groupMap );
 }
